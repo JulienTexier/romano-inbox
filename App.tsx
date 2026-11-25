@@ -1,10 +1,19 @@
 import Constants from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Header } from './src/Header';
 import { scheduleNudges } from './src/nudges';
+import { PostCard } from './src/PostCard';
+import { useTheme } from './src/theme';
+import { useInbox } from './src/useInbox';
 
-export default function App() {
+function Inbox() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const { posts, status, refreshing, maybeGap, refresh, read } = useInbox();
   const [notificationsOn, setNotificationsOn] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -13,19 +22,50 @@ export default function App() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      {notificationsOn === false && <Text>Notifications off</Text>}
+    <View style={[styles.screen, { backgroundColor: theme.bg, paddingTop: insets.top }]}>
+      <FlatList
+        data={posts}
+        keyExtractor={(p) => p.id}
+        renderItem={({ item }) => <PostCard post={item} onRead={(id) => read([id])} />}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
+        stickyHeaderIndices={[0]}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.muted} />}
+        ListHeaderComponent={
+          <View style={{ backgroundColor: theme.bg }}>
+            <Header count={posts.length} status={status} onClearAll={() => read(posts.map((p) => p.id))} />
+            {maybeGap ? <Text style={[styles.note, { color: theme.warn }]}>Busy day: a few posts may be missing.</Text> : null}
+            {notificationsOn === false ? <Text style={[styles.note, { color: theme.warn }]}>Notifications off</Text> : null}
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyIcon}>⚽</Text>
+            <Text style={[styles.emptyTitle, { color: theme.ink }]}>You're all caught up</Text>
+            <Text style={{ color: theme.muted }}>Go do something else.</Text>
+          </View>
+        }
+      />
       <StatusBar style="auto" />
     </View>
   );
 }
 
+export default function App() {
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <SafeAreaProvider>
+        <Inbox />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  root: { flex: 1 },
+  screen: { flex: 1 },
+  content: { paddingHorizontal: 16 },
+  note: { fontSize: 14, marginBottom: 10 },
+  empty: { alignItems: 'center', paddingTop: 140, paddingHorizontal: 16 },
+  emptyIcon: { fontSize: 44 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', marginTop: 8, marginBottom: 4 },
 });
