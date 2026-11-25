@@ -11,7 +11,8 @@ const config: ExpoConfig = {
     bundleIdentifier: 'com.jtexier.romanoinbox',
     supportsTablet: false,
   },
-  plugins: ['expo-notifications'],
+  // Mods run in reverse order: keep the entitlement stripper BEFORE expo-notifications so it runs last.
+  plugins: ['./plugins/withoutPushEntitlement', 'expo-notifications'],
   extra: {
     builtAt: Date.now(),
   },
