@@ -42,22 +42,22 @@ You need a Mac with Xcode and Node, an iPhone, and a cable.
    ```
 
 2. In Xcode, open Settings → Accounts and add your personal Apple ID.
-3. Generate the native project:
+3. If you forked this repo, change the bundle identifier `com.jtexier.romanoinbox` in `app.config.ts` to your own now, because the next step bakes it into the native project.
+4. Generate the native project:
 
    ```bash
    npx expo prebuild -p ios
    ```
 
    If CocoaPods complains about encoding, prefix the command with `LANG=en_US.UTF-8`.
-4. Open `ios/*.xcworkspace` in Xcode and choose your Personal Team under Signing & Capabilities.
-   If you forked this repo, first change the bundle identifier `com.jtexier.romanoinbox` in `app.config.ts` to your own.
-5. Plug in the phone and run:
+5. Open `ios/*.xcworkspace` in Xcode and choose your Personal Team under Signing & Capabilities.
+6. Plug in the phone and run:
 
    ```bash
    npx expo run:ios --device --configuration Release
    ```
 
-6. First install only: on the phone, turn on Developer Mode (Settings → Privacy & Security → Developer Mode), then trust your developer profile under Settings → General → VPN & Device Management.
+7. First install only: on the phone, turn on Developer Mode (Settings → Privacy & Security → Developer Mode), then trust your developer profile under Settings → General → VPN & Device Management.
 
 ## The 7-day limit
 
