@@ -18,3 +18,12 @@ test('picks mosaic, then medium photo, then video thumbnail', () => {
 test('toPost falls back to created_at when created_timestamp is missing', () => {
   expect(toPost({ id: '9', created_at: 'Tue Nov 24 14:28:54 +0000 2026', text: 'x' }).ts).toBe(1795530534);
 });
+test('prefers the first photo over an earlier video thumbnail', () => {
+  expect(imageUrl({ all: [{ type: 'video', thumbnail_url: 'T' }, { type: 'photo', url: 'P?name=orig' }] })).toBe('P?name=medium');
+});
+test('toPost gives ts 0 for an unparseable created_at', () => {
+  expect(toPost({ id: '9', created_at: '' }).ts).toBe(0);
+});
+test('toPost honours a +0200 offset in created_at', () => {
+  expect(toPost({ id: '9', created_at: 'Tue Nov 24 16:28:54 +0200 2026' }).ts).toBe(1795530534);
+});
