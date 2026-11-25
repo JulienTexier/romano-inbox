@@ -82,3 +82,29 @@ test('a refresh while one is running is ignored', async () => {
   await act(async () => resolve([]));
   await waitFor(() => expect(result.current.refreshing).toBe(false));
 });
+
+test('loaded is false before saved state loads', async () => {
+  const fetchLatest = jest.fn().mockResolvedValue([]);
+  const seen: boolean[] = [];
+  const { result } = await renderHook(() => {
+    const inbox = useInbox({ fetchLatest });
+    seen.push(inbox.loaded);
+    return inbox;
+  });
+  expect(seen[0]).toBe(false);
+  await waitFor(() => expect(result.current.loaded).toBe(true));
+});
+
+test('everChecked stays false when the first fetch fails', async () => {
+  const fetchLatest = jest.fn().mockRejectedValue(new Error('offline'));
+  const { result } = await renderHook(() => useInbox({ fetchLatest }));
+  await waitFor(() => expect(result.current.status).toMatch(/^Couldn't check/));
+  expect(result.current.loaded).toBe(true);
+  expect(result.current.everChecked).toBe(false);
+});
+
+test('everChecked becomes true after a successful fetch', async () => {
+  const fetchLatest = jest.fn().mockResolvedValue([]);
+  const { result } = await renderHook(() => useInbox({ fetchLatest }));
+  await waitFor(() => expect(result.current.everChecked).toBe(true));
+});

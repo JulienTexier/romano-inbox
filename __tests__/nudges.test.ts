@@ -35,7 +35,7 @@ test('schedules 13:00 and 20:00 daily plus one reinstall reminder', async () => 
       { title: '📬 Romano catch-up', body: "Open your inbox to see what's new." },
       {
         title: 'Reinstall Romano',
-        body: 'The free install expires tomorrow. Plug in and run the install command.',
+        body: 'The free install expires soon. Plug in and run the install command.',
       },
     ]),
   );

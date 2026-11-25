@@ -9,6 +9,8 @@ export type UseInbox = {
   posts: Post[]; // newest first
   status: string;
   refreshing: boolean;
+  loaded: boolean; // saved state has been read
+  everChecked: boolean; // a fetch has succeeded at least once
   maybeGap: boolean;
   refresh(): Promise<void>;
   read(ids: string[]): void;
@@ -30,6 +32,7 @@ export function useInbox(deps: { fetchLatest?: typeof defaultFetchLatest } = {})
   const [state, setState] = useState<InboxState>(emptyState());
   const [status, setStatus] = useState('Loading…');
   const [refreshing, setRefreshing] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const commit = useCallback((next: InboxState) => {
     stateRef.current = next;
@@ -74,6 +77,7 @@ export function useInbox(deps: { fetchLatest?: typeof defaultFetchLatest } = {})
       stateRef.current = saved;
       loadedRef.current = true;
       setState(saved);
+      setLoaded(true);
       void refresh();
     });
     const sub = AppState.addEventListener('change', (s) => {
@@ -86,5 +90,5 @@ export function useInbox(deps: { fetchLatest?: typeof defaultFetchLatest } = {})
   }, [refresh]);
 
   const posts = [...state.inbox].reverse();
-  return { posts, status, refreshing, maybeGap: state.maybeGap, refresh, read };
+  return { posts, status, refreshing, loaded, everChecked: state.lastChecked !== null, maybeGap: state.maybeGap, refresh, read };
 }

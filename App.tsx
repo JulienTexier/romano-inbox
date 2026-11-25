@@ -13,7 +13,7 @@ import { useInbox } from './src/useInbox';
 function Inbox() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { posts, status, refreshing, maybeGap, refresh, read } = useInbox();
+  const { posts, status, refreshing, loaded, everChecked, maybeGap, refresh, read } = useInbox();
   const [notificationsOn, setNotificationsOn] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -38,11 +38,15 @@ function Inbox() {
           </View>
         }
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>⚽</Text>
-            <Text style={[styles.emptyTitle, { color: theme.ink }]}>You're all caught up</Text>
-            <Text style={{ color: theme.muted }}>Go do something else.</Text>
-          </View>
+          !loaded ? undefined : (
+            <View style={styles.empty}>
+              <Text style={styles.emptyIcon}>⚽</Text>
+              <Text style={[styles.emptyTitle, { color: theme.ink }]}>
+                {everChecked ? "You're all caught up" : 'Nothing loaded yet'}
+              </Text>
+              <Text style={{ color: theme.muted }}>{everChecked ? 'Go do something else.' : 'Pull down to try again.'}</Text>
+            </View>
+          )
         }
       />
       <StatusBar style="auto" />

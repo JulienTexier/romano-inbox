@@ -6,7 +6,7 @@ const NUDGE_CONTENT = {
 };
 const REINSTALL_CONTENT = {
   title: 'Reinstall Romano',
-  body: 'The free install expires tomorrow. Plug in and run the install command.',
+  body: 'The free install expires soon. Plug in and run the install command.',
 };
 const NUDGE_HOURS = [13, 20];
 
