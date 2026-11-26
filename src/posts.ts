@@ -6,12 +6,16 @@ export type RawStatus = {
   replying_to?: { screen_name?: string } | string | null;
   reposted_by?: unknown;
   media?: {
-    all?: { type: string; url?: string; thumbnail_url?: string }[];
+    all?: { type: string; url?: string; thumbnail_url?: string; width?: number; height?: number }[];
     mosaic?: { formats?: { jpeg?: string } };
   };
 };
 
-export type Post = { id: string; ts: number; text: string; image: string | null };
+export type Media =
+  | { type: 'photo'; url: string; width: number; height: number }
+  | { type: 'video'; url: string; thumb: string | null; width: number; height: number; loop: boolean };
+
+export type Post = { id: string; ts: number; text: string; media: Media[] };
 
 const HANDLE = 'FabrizioRomano';
 
@@ -31,15 +35,21 @@ export function cleanText(t: string | undefined): string {
     .trim();
 }
 
-export function imageUrl(media: RawStatus['media']): string | null {
-  if (!media) return null;
-  const mosaic = media.mosaic?.formats?.jpeg;
-  if (mosaic) return mosaic;
-  const all = media.all ?? [];
-  const photo = all.find((m) => m.type === 'photo' && m.url);
-  if (photo?.url) return photo.url.replace('name=orig', 'name=medium');
-  const video = all.find((m) => m.type !== 'photo' && m.thumbnail_url);
-  return video?.thumbnail_url ?? null;
+// Every photo and video in the post, in order. Videos without a playable url fall back to their thumbnail as a photo.
+export function mediaList(media: RawStatus['media']): Media[] {
+  const out: Media[] = [];
+  for (const m of media?.all ?? []) {
+    const width = m.width ?? 0;
+    const height = m.height ?? 0;
+    if (m.type === 'photo' && m.url) {
+      out.push({ type: 'photo', url: m.url.replace('name=orig', 'name=medium'), width, height });
+    } else if ((m.type === 'video' || m.type === 'gif') && m.url) {
+      out.push({ type: 'video', url: m.url, thumb: m.thumbnail_url ?? null, width, height, loop: m.type === 'gif' });
+    } else if (m.thumbnail_url) {
+      out.push({ type: 'photo', url: m.thumbnail_url, width, height });
+    }
+  }
+  return out;
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -58,5 +68,5 @@ function parseTwitterDate(str: string): number {
 
 export function toPost(s: RawStatus): Post {
   const ts = s.created_timestamp ?? parseTwitterDate(s.created_at);
-  return { id: s.id, ts, text: cleanText(s.text), image: imageUrl(s.media) };
+  return { id: s.id, ts, text: cleanText(s.text), media: mediaList(s.media) };
 }

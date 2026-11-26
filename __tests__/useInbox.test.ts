@@ -7,7 +7,7 @@ import { useInbox } from '../src/useInbox';
 
 const NOW = Math.floor(Date.now() / 1000);
 
-const post = (id: string, ts: number): Post => ({ id, ts, text: `post ${id}`, image: null });
+const post = (id: string, ts: number): Post => ({ id, ts, text: `post ${id}`, media: [] });
 const raw = (id: string, ts: number): RawStatus => ({
   id,
   text: `fresh ${id}`,

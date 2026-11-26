@@ -34,7 +34,7 @@ test('keeps the newest seen ids by numeric order, beyond 2^53', () => {
   expect(state.seen).toContain(String(base + 600n));
 });
 test('sets lastChecked, orders inbox oldest first, does not mutate input', () => {
-  const s0 = { ...emptyState(), seen: ['1'], inbox: [{ id: '1', ts: 5, text: '', image: null }] };
+  const s0 = { ...emptyState(), seen: ['1'], inbox: [{ id: '1', ts: 5, text: '', media: [] }] };
   const snapshot = JSON.parse(JSON.stringify(s0));
   const { state } = mergeFetched(s0, [raw('3', 30), raw('2', 20), raw('1', 5)], 99);
   expect(state.inbox.map((p) => p.id)).toEqual(['1', '2', '3']);
@@ -42,7 +42,7 @@ test('sets lastChecked, orders inbox oldest first, does not mutate input', () =>
   expect(s0).toEqual(snapshot);
 });
 test('markRead removes ids and clears the gap flag', () => {
-  const s = { ...emptyState(), maybeGap: true, inbox: [{ id: 'a', ts: 1, text: '', image: null }] };
+  const s = { ...emptyState(), maybeGap: true, inbox: [{ id: 'a', ts: 1, text: '', media: [] }] };
   expect(markRead(s, ['a'])).toMatchObject({ inbox: [], maybeGap: false });
   expect(s.inbox).toHaveLength(1);
 });

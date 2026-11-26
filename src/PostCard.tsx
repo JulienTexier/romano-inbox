@@ -1,8 +1,6 @@
-import { Image } from 'expo-image';
-import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { imageAspect } from './imageAspect';
+import { PostMedia } from './PostMedia';
 import type { Post } from './posts';
 import { useTheme, type Theme } from './theme';
 
@@ -15,19 +13,6 @@ export function timeLabel(ts: number, now: Date = new Date()): string {
   if (d.toDateString() === y.toDateString()) return `Yesterday ${time}`;
   const day = d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
   return `${day} ${time}`;
-}
-
-function PostImage({ uri, theme }: { uri: string; theme: Theme }) {
-  const [aspect, setAspect] = useState(16 / 9);
-  return (
-    <Image
-      source={{ uri }}
-      style={[styles.image, { aspectRatio: aspect, backgroundColor: theme.line }]}
-      contentFit="contain"
-      onLoad={(e) => setAspect(imageAspect(e.source.width, e.source.height))}
-      accessible={false}
-    />
-  );
 }
 
 function ReadStrip({ side, theme }: { side: 'left' | 'right'; theme: Theme }) {
@@ -64,9 +49,7 @@ export function PostCard({ post, onRead }: { post: Post; onRead: (id: string) =>
           </Pressable>
         </View>
         {post.text ? <Text style={[styles.text, { color: theme.ink }]}>{post.text}</Text> : null}
-        {post.image ? (
-          <PostImage uri={post.image} theme={theme} />
-        ) : null}
+        <PostMedia media={post.media} theme={theme} />
       </View>
     </ReanimatedSwipeable>
   );
@@ -82,5 +65,4 @@ const styles = StyleSheet.create({
   readButton: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 3 },
   readButtonText: { fontSize: 13 },
   text: { fontSize: 16, lineHeight: 23 },
-  image: { width: '100%', borderRadius: 10, marginTop: 10 },
 });
